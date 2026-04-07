@@ -1,0 +1,19 @@
+﻿{
+    "name":  "automation-workspace",
+    "version":  "1.0.0",
+    "private":  true,
+    "workspaces":  [
+                       "playwright-core",
+                       "projetos/*",
+                       "meu-sistema"
+                   ],
+    "scripts":  {
+                    "test:parabank":  "npm test --workspace=parabank",
+                    "install:all":  "npm install --ignore-scripts",
+                    "new:project":  "powershell -ExecutionPolicy Bypass -File scripts/novo-projeto.ps1 -Nome",
+                    "test:meu-sistema":  "npm test --workspace=meu-sistema",
+                    "test:novo-sistema":  "npm test --workspace=novo-sistema",
+                    "test:jira":  "npm test --workspace=jira",
+                    "test:bex":  "npm test --workspace=bex"
+                }
+}
