@@ -48,7 +48,7 @@ npm test
 Rodar um teste especifico:
 
 ```bash
-npx playwright test e2e/Parabank/testes/login/LoginTest.spec.ts
+npx playwright test e2e/Parabank/testes/login/LicenciarTest.spec.ts
 ```
 
 Rodar com navegador aberto:

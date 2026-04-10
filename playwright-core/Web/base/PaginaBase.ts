@@ -1,4 +1,3 @@
-
 import { Page } from '@playwright/test';
 import { Botao } from '../componentes/Botao';
 import { CaixaTexto } from '../componentes/CaixaTexto';
@@ -8,6 +7,7 @@ import { Espera } from '../componentes/Espera';
 import { Assertiva } from '../componentes/Assertiva';
 import { Calendario } from '../componentes/Calendario';
 import { Tabela } from '../componentes/Tabela';
+import { Cenario } from '../utils/TiposTeste';
 
 
 export abstract class PaginaBase {
@@ -41,13 +41,8 @@ export abstract class PaginaBase {
         await this.page.goto(url);
     }
 
-    abstract acessar();
-
-    abstract preencherDados<T>(dados: T);
-
-    abstract executar();
-
-
-
+    abstract acessar(): Promise<void>;
+    abstract preencherDados(cenario: Cenario): Promise<void>;
+    abstract executar(cenario: Cenario): Promise<void>;
 
 }

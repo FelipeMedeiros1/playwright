@@ -1,43 +1,41 @@
 import { Locator, Page } from '@playwright/test';
-import { PaginaBase } from 'playwright-core';
+import { PaginaBase, LeitorDeArquivo, DadosTeste, Cenario } from 'playwright-core';
 
+interface Credenciais { matricula: string; senha: string; }
+
+const dados =
+    LeitorDeArquivo.lerDados<DadosTeste<Credenciais>>('e2e/dados/credenciais/dadosUsuario.json');
 
 export default class PaginaDeLogin extends PaginaBase {
+
     private readonly userName: Locator;
     private readonly password: Locator;
-    private readonly button: Locator;
+    private readonly botaoLogin: Locator;
+    private readonly botaoFechar: Locator;
 
     constructor(pagina: Page) {
         super(pagina);
-        this.userName = pagina.getByRole('textbox', { name: 'Usuário' });
-        this.password = pagina.getByRole('textbox', { name: 'Senha' });
-        this.botaoLogin = pagina.getByRole('button', { name: 'LOGIN' });
-        this.botaoFechar = pagina.getByRole('button', { name: 'Fechar' });
-        this.linkLicenciarUsuario = pagina.locator('nav').getByRole('link', { name: 'Licenciar Usuário DevOps' });
-        this.matricula = pagina.locator('#matricula');
-        this.senha = pagina.locator('#senha');
+        this.userName    = pagina.getByRole('textbox', { name: 'Usuário' });
+        this.password    = pagina.getByRole('textbox', { name: 'Senha' });
+        this.botaoLogin  = pagina.getByRole('button',  { name: 'LOGIN' });
+        this.botaoFechar = pagina.getByRole('button',  { name: 'Fechar' });
     }
 
     async acessar() {
         await this.acessarUrl('/');
-        //await this.assertiva.contemTexto(this.message, 'Signing up is easy!');
     }
 
-    async preencherDados<T>(dados?: T): Promise<void> {
-        const usuario = 'M565868';
-        const senha = 'gftfe23';
-        //const { usuario, senha } = obterSessao();
-        await this.caixaTexto.preencherCampo(this.userName, usuario);
+    async preencherDados(cenario: Cenario): Promise<void> {
+        const { matricula, senha } = dados[cenario];
+        await this.caixaTexto.preencherCampo(this.userName, matricula);
         await this.caixaTexto.preencherCampo(this.password, senha);
     }
 
-    async executar() {
+    async executar(cenario: Cenario = 'sucesso') {
         await this.acessar();
-        await this.preencherDados();
+        await this.preencherDados(cenario);
         await this.botao.clicar(this.botaoLogin);
         await this.botao.clicar(this.botaoFechar);
-        await this.assertiva.urlContem("telainicial");
-        //await this.botao.clicar(this.linkLicenciarUsuario);
-        //await this.espera.esperarPor(5000);
+        await this.assertiva.urlContem('telainicial');
     }
 }

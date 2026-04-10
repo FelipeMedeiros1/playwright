@@ -15,7 +15,10 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: isCI ? 2 : 0,
   workers: isCI ? 1 : undefined,
-  reporter: 'html',
+  reporter: [
+    ['html'],
+    ['allure-playwright', { outputFolder: 'allure-results', suiteTitle: true }],
+  ],
 
   use: {
     headless: !showBrowser,

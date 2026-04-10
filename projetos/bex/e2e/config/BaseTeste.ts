@@ -1,26 +1,24 @@
-﻿import { test as base, Page, BrowserContext } from '@playwright/test';
+﻿import { test as base } from 'playwright-core';
 import PaginaDeLogin from '../paginas/login/PaginaDeLogin';
+import PaginaLicenciarUsuario from '../paginas/licenciar/PaginaLicenciarUsuario';
 import { Assertiva } from 'playwright-core';
 
 type TestFixtures = {
-  pagina: Page;
-  contexto: BrowserContext;
-  Login: PaginaDeLogin;
-  assertiva: Assertiva;
+    login: PaginaDeLogin;
+    licenciar: PaginaLicenciarUsuario;
+    assertiva: Assertiva;
 };
 
 export const test = base.extend<TestFixtures>({
-  pagina: async ({ page }, use) => {
-      await use(page);
-  },
 
-  contexto: async ({ context }, use) => {
-      await use(context);
-  },
+    login: async ({ page }, use) => {
+        await use(new PaginaDeLogin(page));
+    },
 
-  Login: async ({ page }, use) => {
-      await use(new PaginaDeLogin(page));
-  },
+    licenciar: async ({ page }, use) => {
+        await new PaginaDeLogin(page).executar();
+        await use(new PaginaLicenciarUsuario(page));
+    },
 
     assertiva: async ({ page }, use) => {
         await use(new Assertiva(page));
@@ -28,4 +26,4 @@ export const test = base.extend<TestFixtures>({
 
 });
 
-export { expect } from '@playwright/test';
+export { expect } from 'playwright-core';

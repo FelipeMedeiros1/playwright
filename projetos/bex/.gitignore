@@ -1,0 +1,11 @@
+node_modules/
+
+# Relatórios gerados automaticamente
+reports/allure-results/
+reports/allure-report/
+reports/playwright-report/
+reports/test-results/
+
+# Manter a estrutura da pasta reports no repositório
+!reports/.gitkeep
+

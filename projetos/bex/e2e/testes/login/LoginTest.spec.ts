@@ -2,8 +2,8 @@ import { test } from '../../config/BaseTeste';
 
 test.describe("Sessão Login", () => {
 
-    test("Deve fazer login com sucesso", async ({ Login }) => {
-        await Login.executar();
+    test("Deve fazer login com sucesso", async ({ login }) => {
+        await login.executar();
     });
 });
 

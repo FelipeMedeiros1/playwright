@@ -38,9 +38,35 @@ if (Test-Path $destino) {
 
 # ── Pastas ───────────────────────────────────────────────────
 Write-Host "`n Criando estrutura..." -ForegroundColor Cyan
-foreach ($p in @("e2e\config","e2e\paginas","e2e\testes","e2e\utils")) {
+foreach ($p in @(
+    "e2e\config",
+    "e2e\paginas",
+    "e2e\testes",
+    "e2e\utils",
+    "e2e\dados",
+    "reports\allure-results",
+    "reports\allure-report",
+    "reports\playwright-report",
+    "reports\test-results"
+)) {
     New-Item -ItemType Directory -Path (Join-Path $destino $p) -Force | Out-Null
 }
+New-Item -ItemType File -Force -Path (Join-Path $destino "reports\.gitkeep") | Out-Null
+
+# ── .gitignore ────────────────────────────────────────────────
+$gitignoreContent = @"
+node_modules/
+
+# Relatorios gerados automaticamente
+reports/allure-results/
+reports/allure-report/
+reports/playwright-report/
+reports/test-results/
+
+# Manter a estrutura da pasta reports no repositorio
+!reports/.gitkeep
+"@
+$gitignoreContent | Set-Content (Join-Path $destino ".gitignore") -Encoding UTF8
 
 # ── package.json ─────────────────────────────────────────────
 $pkgContent = @"
@@ -51,12 +77,12 @@ $pkgContent = @"
   "main": "index.js",
   "type": "commonjs",
   "scripts": {
-    "test":               "playwright test",
-    "test:headed":        "playwright test --headed",
+    "test":               "npx rimraf reports/allure-results && playwright test",
+    "test:headed":        "npx rimraf reports/allure-results && playwright test --headed",
     "test:ui":            "playwright test --ui",
-    "report:html":        "playwright show-report",
-    "report:allure":      "allure generate -c allure-results -o allure-report",
-    "report:allure:open": "allure serve allure-results"
+    "report:html":        "playwright show-report reports/playwright-report",
+    "report:allure":      "allure generate reports/allure-results -c -o reports/allure-report",
+    "report:allure:open": "allure serve reports/allure-results"
   },
   "dependencies": {
     "playwright-core": "$coreUrl"
@@ -102,15 +128,19 @@ const showBrowser = !isCI;
 
 export default defineConfig({
   testDir: './e2e',
+  outputDir: './reports/test-results',
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: isCI ? 2 : 0,
   workers: isCI ? 1 : undefined,
-  reporter: 'html',
+  reporter: [
+    ['html',              { outputFolder: 'reports/playwright-report' }],
+    ['allure-playwright', { resultsDir: 'reports/allure-results', suiteTitle: true }],
+  ],
   use: {
     headless: !showBrowser,
     viewport: { width: 1280, height: 720 },
-    screenshot: 'only-on-failure',
+    screenshot: 'on',
     video: isCI ? 'retain-on-failure' : 'on',
     baseURL: '$BaseURL',
     trace: isCI ? 'on-first-retry' : 'off',

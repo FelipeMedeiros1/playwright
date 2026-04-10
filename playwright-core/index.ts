@@ -1,5 +1,7 @@
 // Core exports - Web Framework
 export { PaginaBase } from './Web/base/PaginaBase';
+export { test, expect } from './Web/base/BaseTeste';
+export type { BaseFixtures } from './Web/base/BaseTeste';
 
 // Componentes
 export { Assertiva } from './Web/componentes/Assertiva';
@@ -32,3 +34,4 @@ export { NumeroUtils } from './Web/utils/NumeroUtils';
 export { TextoUtils } from './Web/utils/TextoUtils';
 export { Validador } from './Web/utils/Validador';
 export type { DadosCompletos } from './Web/utils/TiposDeDados';
+export type { Cenario, DadosTeste } from './Web/utils/TiposTeste';

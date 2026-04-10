@@ -1,0 +1,11 @@
+{
+  "sucesso": {
+    "matricula": "M565868",
+    "senha": "gftfe01"
+  },
+  "falha": {
+    "matricula": "M565868Err",
+    "senha": "gftfe"
+  }
+}
+
