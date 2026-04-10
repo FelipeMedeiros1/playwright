@@ -57,6 +57,11 @@ New-Item -ItemType File -Force -Path (Join-Path $destino "reports\.gitkeep") | O
 $gitignoreContent = @"
 node_modules/
 
+# Dados sensíveis - credenciais
+# Todo o conteudo de e2e/dados/ deve permanecer fora do repositorio.
+# Nao armazene arquivos de exemplo com credenciais nesta pasta.
+e2e/dados/
+
 # Relatorios gerados automaticamente
 reports/allure-results/
 reports/allure-report/

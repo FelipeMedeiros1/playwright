@@ -1,5 +1,9 @@
 node_modules/
 
+# Dados sensíveis - credenciais
+e2e/dados/
+!e2e/dados/**/*.example.json
+
 # Relatórios gerados automaticamente
 reports/allure-results/
 reports/allure-report/
