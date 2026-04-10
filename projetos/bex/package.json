@@ -5,11 +5,11 @@
   "main": "index.js",
   "type": "commonjs",
   "scripts": {
-    "test": "npx rimraf reports/allure-results && playwright test",
-    "test:headed": "npx rimraf reports/allure-results && playwright test --headed",
-    "test:ui": "playwright test --ui",
-    "report:html": "playwright show-report reports/playwright-report",
-    "report:allure": "allure generate reports/allure-results -c -o reports/allure-report",
+    "test":               "npx rimraf reports/allure-results reports/playwright-report reports/test-results && playwright test",
+    "test:headed":        "npx rimraf reports/allure-results reports/playwright-report reports/test-results && playwright test --headed",
+    "test:ui":            "playwright test --ui",
+    "report:html":        "playwright show-report reports/playwright-report",
+    "report:allure":      "allure generate reports/allure-results -c -o reports/allure-report",
     "report:allure:open": "allure serve reports/allure-results"
   },
   "dependencies": {

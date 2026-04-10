@@ -58,9 +58,12 @@ $gitignoreContent = @"
 node_modules/
 
 # Dados sensíveis - credenciais
-# Todo o conteudo de e2e/dados/ deve permanecer fora do repositorio.
-# Nao armazene arquivos de exemplo com credenciais nesta pasta.
-e2e/dados/
+# Arquivos JSON/YAML em e2e/dados/ podem conter credenciais reais - nao commitar.
+e2e/dados/**/*.json
+e2e/dados/**/*.yaml
+e2e/dados/**/*.yml
+# Excecao: arquivo de exemplo (sem credenciais reais) pode ser commitado.
+!e2e/dados/DadosExemplo.json
 
 # Relatorios gerados automaticamente
 reports/allure-results/
@@ -82,8 +85,8 @@ $pkgContent = @"
   "main": "index.js",
   "type": "commonjs",
   "scripts": {
-    "test":               "npx rimraf reports/allure-results && playwright test",
-    "test:headed":        "npx rimraf reports/allure-results && playwright test --headed",
+    "test":               "npx rimraf reports/allure-results reports/playwright-report reports/test-results && playwright test",
+    "test:headed":        "npx rimraf reports/allure-results reports/playwright-report reports/test-results && playwright test --headed",
     "test:ui":            "playwright test --ui",
     "report:html":        "playwright show-report reports/playwright-report",
     "report:allure":      "allure generate reports/allure-results -c -o reports/allure-report",
@@ -98,6 +101,7 @@ $pkgContent = @"
     "allure-commandline": "^2.34.1",
     "allure-playwright":  "^3.3.3",
     "playwright":         "^1.54.2",
+    "rimraf":             "^6.1.3",
     "ts-node":            "^10.9.2",
     "typescript":         "^5.9.2"
   }
@@ -136,10 +140,10 @@ export default defineConfig({
   outputDir: './reports/test-results',
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
-  retries: isCI ? 2 : 0,
+  retries: 0,
   workers: isCI ? 1 : undefined,
   reporter: [
-    ['html',              { outputFolder: 'reports/playwright-report' }],
+    ['html',              { outputFolder: 'reports/playwright-report', open: 'never' }],
     ['allure-playwright', { resultsDir: 'reports/allure-results', suiteTitle: true }],
   ],
   use: {
@@ -176,6 +180,22 @@ export const test = base.extend<TestFixtures>({
 export { expect } from '@playwright/test';
 "@
 $baseTesteContent | Set-Content (Join-Path $destino "e2e\config\BaseTeste.ts") -Encoding UTF8
+
+# ── DadosExemplo.json ────────────────────────────────────────
+$dadosExemploContent = @"
+{
+  "_comentario": "Arquivo de dados de exemplo. Copie e renomeie (ex.: DadosLogin.json) preenchendo com os dados reais. Arquivos reais estao no .gitignore.",
+  "sucesso": {
+    "usuario": "SEU_USUARIO",
+    "senha":   "SUA_SENHA"
+  },
+  "falha": {
+    "usuario": "SEU_USUARIO_INVALIDO",
+    "senha":   "SUA_SENHA_INVALIDA"
+  }
+}
+"@
+$dadosExemploContent | Set-Content (Join-Path $destino "e2e\dados\DadosExemplo.json") -Encoding UTF8
 
 # ── ExemploTest.spec.ts ───────────────────────────────────────
 $specContent = @"

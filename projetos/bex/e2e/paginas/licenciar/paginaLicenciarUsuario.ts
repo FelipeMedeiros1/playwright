@@ -1,13 +1,16 @@
 import { Locator, Page } from '@playwright/test';
-import { PaginaBase, LeitorDeArquivo, AllureHelper as evidencia, DadosTeste, Cenario } from 'playwright-core';
+import { PaginaBase as pb } from 'playwright-core';
 
-interface Credenciais { matricula: string; senha: string; }
+interface Credenciais {
+    matricula: string;
+    senha: string;
+}
 
 const dados =
-    LeitorDeArquivo.lerDados<DadosTeste<Credenciais>>('e2e/dados/credenciais/dadosUsuario.json');
+    pb.LeitorDeArquivo.lerDados<pb.DadosTeste<Credenciais>>('e2e/dados/credenciais/dadosUsuario.json');
 
 
-export default class PaginaLicenciarUsuario extends PaginaBase {
+export default class PaginaLicenciarUsuario extends pb {
 
     private readonly matricula: Locator;
     private readonly senha: Locator;
@@ -33,32 +36,34 @@ export default class PaginaLicenciarUsuario extends PaginaBase {
         await this.assertiva.urlContem('/licenciar-usuario');
     }
 
-    async preencherDados(cenario: Cenario): Promise<void> {
+    async preencherDados(cenario: pb.Cenario): Promise<void> {
         const { matricula, senha } = dados[cenario];
-        evidencia.parameter('matricula', matricula);
+        pb.evidencia.parameter('matricula', matricula);
         await this.caixaTexto.preencherCampo(this.matricula, matricula);
         await this.caixaTexto.preencherCampo(this.senha, senha);
     }
 
-    async executar(cenario: Cenario = 'sucesso') {
-        evidencia.parameter('cenario', cenario);
+    async executar(cenario: pb.Cenario = 'sucesso') {
+        pb.evidencia.parameter('cenario', cenario);
 
-        await evidencia.step('Acessando pagina: licenciar-usuario', async () => {
+        await pb.evidencia.step('Acessando pagina: licenciar-usuario', async () => {
             await this.acessar();
         });
 
-        await evidencia.step('Preencher dados', async () => {
+        await pb.evidencia.step('Preencher dados', async () => {
             await this.preencherDados(cenario);
         });
 
-        await evidencia.step('Selecionar ferramenta e enviar', async () => {
+        await pb.evidencia.step('Selecionar ferramenta e enviar', async () => {
             await this.comboBox.selecionar(this.cbxFerramentas, "Confluence");
             await this.botao.clicar(this.botaoEnviar);
         });
 
-        await evidencia.step('Validar resultado', async () => {
+        await pb.evidencia.step('Validar resultado', async () => {
             if (cenario === 'sucesso') await this.assertiva.estaVisivel(this.msgSucesso);
             if (cenario === 'falha')   await this.assertiva.estaVisivel(this.msgFalha);
         });
     }
 }
+
+

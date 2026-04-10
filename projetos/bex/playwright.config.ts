@@ -9,10 +9,10 @@ export default defineConfig({
   outputDir: './reports/test-results',
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
-  retries: isCI ? 2 : 0,
+  retries: 0,          // sem retries locais — sem entradas duplicadas no relatório
   workers: isCI ? 1 : undefined,
   reporter: [
-    ['html',             { outputFolder: 'reports/playwright-report' }],
+    ['html', { outputFolder: 'reports/playwright-report', open: 'never' }],
     ['allure-playwright', { resultsDir: 'reports/allure-results', suiteTitle: true }],
   ],
   use: {

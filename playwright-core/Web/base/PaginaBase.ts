@@ -7,11 +7,18 @@ import { Espera } from '../componentes/Espera';
 import { Assertiva } from '../componentes/Assertiva';
 import { Calendario } from '../componentes/Calendario';
 import { Tabela } from '../componentes/Tabela';
+import { AllureHelper } from '../utils/AllureHelper';
+import { LeitorDeArquivo } from '../utils/LeitorDeArquivo';
 import { Cenario } from '../utils/TiposTeste';
+import type { DadosTeste } from '../utils/TiposTeste';
 
 
 export abstract class PaginaBase {
 
+    /** Utilitário de evidências Allure — acessível via `PaginaBase.evidencia` */
+    static readonly evidencia = AllureHelper;
+    /** Leitor de arquivos JSON — acessível via `PaginaBase.LeitorDeArquivo` */
+    static readonly LeitorDeArquivo = LeitorDeArquivo;
 
     protected readonly page: Page;
     protected readonly botao: Botao;
@@ -46,3 +53,16 @@ export abstract class PaginaBase {
     abstract executar(cenario: Cenario): Promise<void>;
 
 }
+
+/**
+ * Namespace merging — expõe tipos sem imports adicionais:
+ * `PaginaBase.Cenario` e `PaginaBase.DadosTeste<T>`
+ */
+export namespace PaginaBase {
+    export type Cenario = 'sucesso' | 'falha' | 'alteracao' | (string & {});
+    export type DadosTeste<T> = DadosTeste_<T>;
+}
+
+// alias interno para o tipo genérico (namespace não permite re-export de genéricos diretamente)
+type DadosTeste_<T> = { sucesso: T; falha: T } & { [cenario: string]: T };
+

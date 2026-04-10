@@ -15,6 +15,9 @@
                     "test:novo-sistema":  "npm test --workspace=novo-sistema",
                     "test:jira":  "npm test --workspace=jira",
                     "test:bex":  "npm test --workspace=bex",
-                    "test:test":  "npm test --workspace=test"
+                    "test:test":  "npm test --workspace=test",
+                    "test:teste":  "npm test --workspace=teste",
+                    "test:teste02":  "npm test --workspace=teste02",
+                    "test:teste03":  "npm test --workspace=teste03"
                 }
 }
