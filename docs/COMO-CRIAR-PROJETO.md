@@ -11,7 +11,7 @@ Este workspace possui um comando que cria toda a estrutura de um novo projeto de
 Entre na pasta do core e suba para um repositório novo:
 
 ```powershell
-cd C:\bradesco\proj-aut\playwright\playwright-core
+cd C:\playwright\playwright-core
 
 git init
 git add .
@@ -36,7 +36,7 @@ Edite o arquivo `.corerc.json` na raiz do workspace:
 ### 3. Registrar o comando no PowerShell (apenas uma vez por máquina)
 
 ```powershell
-$funcao = 'function create-proj { & "C:\bradesco\proj-aut\playwright\create-proj.cmd" @args }'
+$funcao = 'function create-proj { & "C:playwright\create-proj.cmd" @args }'
 Add-Content $PROFILE $funcao
 . $PROFILE
 ```
@@ -66,7 +66,7 @@ create-proj conta-corrente
 
 create-proj investimentos https://invest.bradesco.com.br
 
-create-proj cartao-credito https://cartao.bradesco.com.br
+create-proj cartao-credito https://cartao.bank.com.br
 ```
 
 ---
