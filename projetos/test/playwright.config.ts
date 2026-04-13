@@ -10,10 +10,10 @@ export default defineConfig({
   outputDir: './reports/test-results',
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
-  retries: 0,          // sem retries locais — sem entradas duplicadas no relatório
+  retries: 0,
   workers: isCI ? 1 : undefined,
   reporter: [
-    ['html', { outputFolder: 'reports/playwright-report', open: 'never' }],
+    ['html',              { outputFolder: 'reports/playwright-report', open: 'never' }],
     ['allure-playwright', { resultsDir: 'reports/allure-results', suiteTitle: true }],
   ],
   use: {
@@ -21,11 +21,12 @@ export default defineConfig({
     viewport: { width: 1280, height: 720 },
     screenshot: 'on',
     video: isCI ? 'retain-on-failure' : 'on',
-    baseURL: 'https://devopsadmin.bradesco.com.br:8443/devopsadm/#/index',
+    baseURL: 'https://sua-url-aqui.com',
     trace: isCI ? 'on-first-retry' : 'off',
     launchOptions: { slowMo: isDebug ? 500 : 0 },
   },
   projects: [
-    { name: 'edge', use: { ...devices['Desktop Edge'], channel: 'msedge' } },
+    { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
+    { name: 'edge',     use: { ...devices['Desktop Edge'], channel: 'msedge' } },
   ],
 });

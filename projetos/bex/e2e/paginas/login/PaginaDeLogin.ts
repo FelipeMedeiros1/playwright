@@ -1,12 +1,11 @@
 import { Locator, Page } from '@playwright/test';
-import { PaginaBase, LeitorDeArquivo, DadosTeste, Cenario } from 'playwright-core';
+import { PaginaBase as pb } from 'playwright-core';
 
 interface Credenciais { matricula: string; senha: string; }
 
-const dados =
-    LeitorDeArquivo.lerDados<DadosTeste<Credenciais>>('e2e/dados/credenciais/dadosUsuario.json');
+const dados = pb.carregarDados<Credenciais>('e2e/dados/credenciais/dadosUsuario.json');
 
-export default class PaginaDeLogin extends PaginaBase {
+export default class PaginaDeLogin extends pb {
 
     private readonly userName: Locator;
     private readonly password: Locator;
@@ -25,17 +24,33 @@ export default class PaginaDeLogin extends PaginaBase {
         await this.acessarUrl('/');
     }
 
-    async preencherDados(cenario: Cenario): Promise<void> {
-        const { matricula, senha } = dados[cenario];
+    async preencherDados(): Promise<void> {
+        const { matricula, senha } = dados.obter(this.cenario);
         await this.caixaTexto.preencherCampo(this.userName, matricula);
         await this.caixaTexto.preencherCampo(this.password, senha);
     }
 
-    async executar(cenario: Cenario = 'sucesso') {
-        await this.acessar();
-        await this.preencherDados(cenario);
-        await this.botao.clicar(this.botaoLogin);
-        await this.botao.clicar(this.botaoFechar);
-        await this.assertiva.urlContem('telainicial');
+    async executar(cenario: pb.Cenario = 'sucesso') {
+        this.cenario = cenario;
+        pb.evidencia.parameter('cenario', cenario);
+
+        await pb.evidencia.step('Acessando pagina: login', async () => {
+            await this.acessar();
+        });
+
+        await pb.evidencia.step('Preencher dados', async () => {
+            await this.preencherDados();
+        });
+
+        await pb.evidencia.step('Realizar login', async () => {
+            await this.botao.clicar(this.botaoLogin);
+            if (await this.assertiva.estaVisivel(this.botaoFechar)) {
+                await this.botao.clicar(this.botaoFechar);
+            }
+        });
+
+        await pb.evidencia.step('Validar resultado', async () => {
+            await this.assertiva.urlContem('telainicial');
+        });
     }
 }

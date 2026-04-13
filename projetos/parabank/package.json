@@ -9,8 +9,9 @@
                     "test:headed":  "playwright test --headed",
                     "test:ui":  "playwright test --ui",
                     "report:html":  "playwright show-report",
-                    "report:allure":  "allure generate -c allure-results -o allure-report",
-                    "report:allure:open":  "allure serve allure-results",
+                    "report:allure":       "allure generate -c allure-results -o allure-report",
+                    "report:allure:open":  "allure open allure-report",
+                    "report:allure:reset": "npx rimraf allure-results allure-report && echo Historico e resultados limpos. Execute npm test para uma nova execucao.",
                     "prepare":  "playwright install --with-deps"
                 },
     "keywords":  [

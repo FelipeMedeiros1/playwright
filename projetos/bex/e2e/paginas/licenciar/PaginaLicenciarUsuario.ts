@@ -7,7 +7,7 @@ interface Credenciais {
 }
 
 const dados =
-    pb.LeitorDeArquivo.lerDados<pb.DadosTeste<Credenciais>>('e2e/dados/credenciais/dadosUsuario.json');
+    pb.carregarDados<Credenciais>('e2e/dados/credenciais/dadosUsuario.json');
 
 
 export default class PaginaLicenciarUsuario extends pb {
@@ -36,14 +36,15 @@ export default class PaginaLicenciarUsuario extends pb {
         await this.assertiva.urlContem('/licenciar-usuario');
     }
 
-    async preencherDados(cenario: pb.Cenario): Promise<void> {
-        const { matricula, senha } = dados[cenario];
+    async preencherDados(): Promise<void> {
+        const { matricula, senha } = dados.obter(this.cenario);
         pb.evidencia.parameter('matricula', matricula);
         await this.caixaTexto.preencherCampo(this.matricula, matricula);
         await this.caixaTexto.preencherCampo(this.senha, senha);
     }
 
     async executar(cenario: pb.Cenario = 'sucesso') {
+        this.cenario = cenario;
         pb.evidencia.parameter('cenario', cenario);
 
         await pb.evidencia.step('Acessando pagina: licenciar-usuario', async () => {
@@ -51,11 +52,11 @@ export default class PaginaLicenciarUsuario extends pb {
         });
 
         await pb.evidencia.step('Preencher dados', async () => {
-            await this.preencherDados(cenario);
+            await this.preencherDados();
         });
 
         await pb.evidencia.step('Selecionar ferramenta e enviar', async () => {
-            await this.comboBox.selecionar(this.cbxFerramentas, "Confluence");
+            await this.comboBox.selecionar(this.cbxFerramentas, "Confluence");//Confluence,Jira,GitHub
             await this.botao.clicar(this.botaoEnviar);
         });
 

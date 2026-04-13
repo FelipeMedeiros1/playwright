@@ -33,5 +33,7 @@ export { LimpezaDeAmbiente } from './Web/utils/LimpezaDeAmbiente';
 export { NumeroUtils } from './Web/utils/NumeroUtils';
 export { TextoUtils } from './Web/utils/TextoUtils';
 export { Validador } from './Web/utils/Validador';
+export { configurarAmbiente } from './Web/utils/GlobalSetup';
 export type { DadosCompletos } from './Web/utils/TiposDeDados';
 export type { Cenario, DadosTeste } from './Web/utils/TiposTeste';
+export { DadosCenario } from './Web/utils/TiposTeste';

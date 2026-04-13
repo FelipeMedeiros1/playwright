@@ -4,20 +4,12 @@
     "private":  true,
     "workspaces":  [
                        "playwright-core",
-                       "projetos/*",
-                       "meu-sistema"
+                       "projetos/*"
                    ],
     "scripts":  {
-                    "test:parabank":  "npm test --workspace=parabank",
-                    "install:all":  "npm install --ignore-scripts",
-                    "new:project":  "powershell -ExecutionPolicy Bypass -File scripts/novo-projeto.ps1 -Nome",
-                    "test:meu-sistema":  "npm test --workspace=meu-sistema",
-                    "test:novo-sistema":  "npm test --workspace=novo-sistema",
-                    "test:jira":  "npm test --workspace=jira",
-                    "test:bex":  "npm test --workspace=bex",
-                    "test:test":  "npm test --workspace=test",
-                    "test:teste":  "npm test --workspace=teste",
-                    "test:teste02":  "npm test --workspace=teste02",
-                    "test:teste03":  "npm test --workspace=teste03"
+                    "install:all":         "npm install --ignore-scripts",
+                    "novo-projeto":        "powershell -ExecutionPolicy Bypass -File scripts/novo-projeto.ps1 -Nome",
+                    "report:allure:reset": "npm run report:allure:reset --workspaces --if-present",
+                    "report:allure":       "npm run report:allure --workspaces --if-present"
                 }
 }

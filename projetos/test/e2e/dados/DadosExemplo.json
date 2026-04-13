@@ -1,0 +1,11 @@
+﻿{
+  "_comentario": "Arquivo de exemplo. Copie, renomeie (ex.: DadosLogin.json) e preencha com dados reais. Arquivos reais estao no .gitignore.",
+  "sucesso": {
+    "usuario": "SEU_USUARIO",
+    "senha":   "SUA_SENHA"
+  },
+  "falha": {
+    "usuario": "SEU_USUARIO_INVALIDO",
+    "senha":   "SUA_SENHA_INVALIDA"
+  }
+}

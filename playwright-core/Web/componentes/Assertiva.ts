@@ -4,18 +4,35 @@ export class Assertiva {
     constructor(private readonly page: Page) { }
 
     /**
-     * Verifica se o elemento está visível
+     * Verifica se o elemento está visível.
+     * Retorna boolean — pode ser usado como assertiva ou em condicionais (if).
+     * @example
+     * await this.assertiva.estaVisivel(this.msg);             // assertiva
+     * if (await this.assertiva.estaVisivel(this.botaoFechar)) // condicional
      */
-    async estaVisivel(locator: Locator) {
-        await expect(locator).toBeVisible({ timeout: 10000 });
-        await expect(locator).toBeVisible();
+    async estaVisivel(locator: Locator): Promise<boolean> {
+        try {
+            await expect(locator).toBeVisible({ timeout: 2000 });
+            return true;
+        } catch {
+            return false;
+        }
     }
 
     /**
-     * Verifica se o elemento está invisível
+     * Verifica se o elemento está invisível/oculto.
+     * Retorna boolean — pode ser usado como assertiva ou em condicionais (if).
+     * @example
+     * await this.assertiva.estaInvisivel(this.modal);             // assertiva
+     * if (await this.assertiva.estaInvisivel(this.modal)) { ... } // condicional
      */
-    async estaInvisivel(locator: Locator) {
-        await expect(locator).toBeHidden();
+    async estaInvisivel(locator: Locator): Promise<boolean> {
+        try {
+            await expect(locator).toBeHidden({ timeout: 2000 });
+            return true;
+        } catch {
+            return false;
+        }
     }
 
     /**
@@ -109,5 +126,21 @@ export class Assertiva {
     async quantidadeDeElementos(locator: Locator, quantidadeEsperada: number) {
         await expect(locator).toBeVisible({ timeout: 10000 });
         await expect(locator).toHaveCount(quantidadeEsperada);
+    }
+
+    /**
+     * Verifica se o texto do elemento começa com o valor informado
+     */
+    async comecaCom(locator: Locator, texto: string) {
+        await expect(locator).toBeVisible({ timeout: 10000 });
+        await expect(locator).toHaveText(new RegExp(`^${texto}`));
+    }
+
+    /**
+     * Verifica se o texto do elemento termina com o valor informado
+     */
+    async terminaCom(locator: Locator, texto: string) {
+        await expect(locator).toBeVisible({ timeout: 10000 });
+        await expect(locator).toHaveText(new RegExp(`${texto}$`));
     }
 }

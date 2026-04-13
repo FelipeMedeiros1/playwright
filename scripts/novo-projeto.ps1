@@ -89,8 +89,9 @@ $pkgContent = @"
     "test:headed":        "npx rimraf reports/allure-results reports/playwright-report reports/test-results && playwright test --headed",
     "test:ui":            "playwright test --ui",
     "report:html":        "playwright show-report reports/playwright-report",
-    "report:allure":      "allure generate reports/allure-results -c -o reports/allure-report",
-    "report:allure:open": "allure serve reports/allure-results"
+    "report:allure":       "allure generate reports/allure-results -c -o reports/allure-report",
+    "report:allure:open":  "allure open reports/allure-report",
+    "report:allure:reset": "npx rimraf reports/allure-results reports/allure-report && echo Historico e resultados limpos. Execute npm test para uma nova execucao."
   },
   "dependencies": {
     "playwright-core": "$coreUrl"
@@ -137,6 +138,7 @@ const showBrowser = !isCI;
 
 export default defineConfig({
   testDir: './e2e',
+  globalSetup: './e2e/config/globalSetup.ts',
   outputDir: './reports/test-results',
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
@@ -163,6 +165,17 @@ export default defineConfig({
 "@
 $configContent | Set-Content (Join-Path $destino "playwright.config.ts") -Encoding UTF8
 
+# ── globalSetup.ts ───────────────────────────────────────────
+$globalSetupContent = @"
+import { configurarAmbiente } from 'playwright-core';
+
+export default configurarAmbiente({
+    url:      '$BaseURL',
+    ambiente: process.env.AMBIENTE ?? 'Desenvolvimento',
+});
+"@
+$globalSetupContent | Set-Content (Join-Path $destino "e2e\config\globalSetup.ts") -Encoding UTF8
+
 # ── BaseTeste.ts ──────────────────────────────────────────────
 $baseTesteContent = @"
 import { test as base, Page, BrowserContext } from '@playwright/test';
@@ -184,7 +197,7 @@ $baseTesteContent | Set-Content (Join-Path $destino "e2e\config\BaseTeste.ts") -
 # ── DadosExemplo.json ────────────────────────────────────────
 $dadosExemploContent = @"
 {
-  "_comentario": "Arquivo de dados de exemplo. Copie e renomeie (ex.: DadosLogin.json) preenchendo com os dados reais. Arquivos reais estao no .gitignore.",
+  "_comentario": "Arquivo de exemplo. Copie, renomeie (ex.: DadosLogin.json) e preencha com dados reais. Arquivos reais estao no .gitignore.",
   "sucesso": {
     "usuario": "SEU_USUARIO",
     "senha":   "SUA_SENHA"
@@ -197,30 +210,103 @@ $dadosExemploContent = @"
 "@
 $dadosExemploContent | Set-Content (Join-Path $destino "e2e\dados\DadosExemplo.json") -Encoding UTF8
 
+# ── PaginaExemplo.ts ──────────────────────────────────────────
+$paginaExemploContent = @"
+import { Locator, Page } from '@playwright/test';
+import { PaginaBase as pb } from 'playwright-core';
+
+// ── 1. Interface dos dados ────────────────────────────────────────────────────
+// Defina os campos que serao lidos do arquivo JSON/YAML.
+// Se a pagina nao usa dados, remova a interface, o carregarDados e o preencherDados.
+interface DadosExemplo {
+    usuario: string;
+    senha:   string;
+}
+
+// ── 2. Carregamento dos dados (executado uma vez, fora da classe) ─────────────
+const dados = pb.carregarDados<DadosExemplo>('e2e/dados/DadosExemplo.json');
+
+export default class PaginaExemplo extends pb {
+
+    // ── 3. Locators ──────────────────────────────────────────────────────────
+    private readonly campoUsuario: Locator;
+    private readonly campoSenha:   Locator;
+    private readonly botaoEntrar:  Locator;
+    private readonly msgSucesso:   Locator;
+    private readonly msgErro:      Locator;
+
+    constructor(pagina: Page) {
+        super(pagina);
+        this.campoUsuario = pagina.locator('#usuario');
+        this.campoSenha   = pagina.locator('#senha');
+        this.botaoEntrar  = pagina.getByRole('button', { name: 'Entrar' });
+        this.msgSucesso   = pagina.getByText('Bem-vindo!');
+        this.msgErro      = pagina.getByText('Credenciais invalidas');
+    }
+
+    // ── 4. Navegar ate a pagina ───────────────────────────────────────────────
+    async acessar() {
+        await this.page.goto('/');
+        await this.assertiva.urlContem('/login');
+    }
+
+    // ── 5. Preencher dados ────────────────────────────────────────────────────
+    // Sobrescreva somente se a pagina preenche campos.
+    // Remova este metodo inteiro se a pagina so clica/valida.
+    async preencherDados(): Promise<void> {
+        const { usuario, senha } = dados.obter(this.cenario);
+        pb.evidencia.parameter('usuario', usuario);
+        await this.caixaTexto.preencherCampo(this.campoUsuario, usuario);
+        await this.caixaTexto.preencherCampo(this.campoSenha,   senha);
+    }
+
+    // ── 6. Orquestrar o fluxo completo ────────────────────────────────────────
+    async executar(cenario: pb.Cenario = 'sucesso') {
+        this.cenario = cenario;
+        pb.evidencia.parameter('cenario', cenario);
+
+        await pb.evidencia.step('Acessar pagina', async () => {
+            await this.acessar();
+        });
+
+        await pb.evidencia.step('Preencher dados', async () => {
+            await this.preencherDados();
+        });
+
+        await pb.evidencia.step('Confirmar acao', async () => {
+            await this.botao.clicar(this.botaoEntrar);
+        });
+
+        await pb.evidencia.step('Validar resultado', async () => {
+            if (this.cenario === 'sucesso') await this.assertiva.estaVisivel(this.msgSucesso);
+            if (this.cenario === 'falha')   await this.assertiva.estaVisivel(this.msgErro);
+        });
+    }
+}
+"@
+$paginaExemploContent | Set-Content (Join-Path $destino "e2e\paginas\PaginaExemplo.ts") -Encoding UTF8
+
 # ── ExemploTest.spec.ts ───────────────────────────────────────
 $specContent = @"
-import { test, expect } from '../config/BaseTeste';
+import { test }        from '../config/BaseTeste';
+import PaginaExemplo   from '../paginas/PaginaExemplo';
 
-test.describe('$pascal', () => {
+test.describe('$pascal - Exemplo', () => {
 
-  test('Deve acessar a pagina inicial', async ({ pagina }) => {
-    await pagina.goto('/');
-    await expect(pagina).toHaveTitle(/.*/);
-  });
+    test('Deve executar o cenario de sucesso', async ({ pagina }) => {
+        const tela = new PaginaExemplo(pagina);
+        await tela.executar('sucesso');
+    });
+
+    test('Deve executar o cenario de falha', async ({ pagina }) => {
+        const tela = new PaginaExemplo(pagina);
+        await tela.executar('falha');
+    });
 
 });
 "@
 $specContent | Set-Content (Join-Path $destino "e2e\testes\ExemploTest.spec.ts") -Encoding UTF8
 
-# ── Registrar script no workspace raiz ───────────────────────
-Write-Host " Registrando no workspace..." -ForegroundColor Cyan
-$pkgRaiz = Join-Path $raiz "package.json"
-$json = Get-Content $pkgRaiz -Raw | ConvertFrom-Json
-
-$json.scripts | Add-Member -NotePropertyName "test:$Nome" `
-    -NotePropertyValue "npm test --workspace=$Nome" -Force
-
-$json | ConvertTo-Json -Depth 10 | Set-Content $pkgRaiz -Encoding UTF8
 
 # ── npm install ───────────────────────────────────────────────
 Write-Host " Instalando dependencias..." -ForegroundColor Cyan
@@ -230,7 +316,9 @@ Pop-Location
 
 # ── Resultado ────────────────────────────────────────────────
 Write-Host "`n Projeto '$Nome' criado com sucesso!" -ForegroundColor Green
-Write-Host "   Pasta    : $destino"
-Write-Host "   Core     : $coreUrl"
-Write-Host "   Testar   : cd projetos\$Nome ; npx playwright test --list"
-Write-Host "   Da raiz  : npm run test:$Nome"
+Write-Host "   Pasta          : $destino"
+Write-Host "   Core           : $coreUrl"
+Write-Host "   Rodar testes   : cd projetos\$Nome && npm test"
+Write-Host "   Gerar relatorio: npm run report:allure"
+Write-Host "   Zerar tudo     : npm run report:allure:reset"
+Write-Host "   Documentacao   : README.md na raiz do workspace" -ForegroundColor DarkGray

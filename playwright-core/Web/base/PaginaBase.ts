@@ -9,7 +9,7 @@ import { Calendario } from '../componentes/Calendario';
 import { Tabela } from '../componentes/Tabela';
 import { AllureHelper } from '../utils/AllureHelper';
 import { LeitorDeArquivo } from '../utils/LeitorDeArquivo';
-import { Cenario } from '../utils/TiposTeste';
+import { Cenario, DadosCenario } from '../utils/TiposTeste';
 import type { DadosTeste } from '../utils/TiposTeste';
 
 
@@ -20,6 +20,18 @@ export abstract class PaginaBase {
     /** Leitor de arquivos JSON — acessível via `PaginaBase.LeitorDeArquivo` */
     static readonly LeitorDeArquivo = LeitorDeArquivo;
 
+    /**
+     * Carrega dados de teste a partir de um arquivo JSON ou YAML.
+     * O wrapper `DadosTeste<T>` é aplicado automaticamente pelo core.
+     *
+     * @example
+     * const dados = pb.carregarDados<Credenciais>('e2e/dados/credenciais/dadosUsuario.json');
+     * dados['sucesso'].matricula
+     */
+    static carregarDados<T>(caminho: string): DadosCenario<T> {
+        return new DadosCenario<T>(LeitorDeArquivo.lerDados<DadosTeste_<T>>(caminho));
+    }
+
     protected readonly page: Page;
     protected readonly botao: Botao;
     protected readonly caixaTexto: CaixaTexto;
@@ -29,6 +41,9 @@ export abstract class PaginaBase {
     protected readonly assertiva: Assertiva;
     protected readonly tabela: Tabela;
     protected readonly calendario: Calendario;
+
+    /** Cenário ativo — definido por `executar(cenario)` e lido por `preencherDados()` */
+    protected cenario: Cenario = 'sucesso';
 
 
     constructor(page: Page) {
@@ -49,8 +64,9 @@ export abstract class PaginaBase {
     }
 
     abstract acessar(): Promise<void>;
-    abstract preencherDados(cenario: Cenario): Promise<void>;
-    abstract executar(cenario: Cenario): Promise<void>;
+    /** Sobrescreva apenas se a página precisar preencher dados antes de executar. */
+    async preencherDados(): Promise<void> {}
+    abstract executar(cenario?: Cenario): Promise<void>;
 
 }
 
