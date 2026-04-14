@@ -9,12 +9,12 @@ export class LeitorDeArquivo {
     }
 
     static lerJSON<T = unknown>(caminho: string): T {
-        const conteudo = fs.readFileSync(LeitorDeArquivo.resolver(caminho), 'utf8');
+        const conteudo = fs.readFileSync(LeitorDeArquivo.resolver(caminho), 'utf8').replace(/^\uFEFF/, '');
         return JSON.parse(conteudo) as T;
     }
 
     static lerYAML<T = unknown>(caminho: string): T {
-        const conteudo = fs.readFileSync(LeitorDeArquivo.resolver(caminho), 'utf8');
+        const conteudo = fs.readFileSync(LeitorDeArquivo.resolver(caminho), 'utf8').replace(/^\uFEFF/, '');
         return yaml.load(conteudo) as T;
     }
 

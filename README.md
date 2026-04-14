@@ -11,9 +11,10 @@ playwright/
 ├── playwright-core/     ← biblioteca base compartilhada (PaginaBase, componentes, utils)
 ├── projetos/
 │   ├── parabank/        ← projeto E2E parabank
-│   └── .../             ← novos projetos criados com new:project
+│   └── .../             ← novos projetos criados com novo-projeto
 └── scripts/
-    └── novo-projeto.ps1 ← gerador de projetos
+    ├── novo-projeto.ps1 ← gerador de projetos
+    └── novo-projeto.cmd ← atalho para rodar direto no terminal
 ```
 
 ---
@@ -29,16 +30,21 @@ npm run install:all
 ## Criar novo projeto
 
 ```bash
-npm run novo-projeto -- -Nome nome-do-projeto
-npm run novo-projeto -- -Nome nome-do-projeto -BaseURL https://url-do-sistema.com
+# Direto no terminal (PATH configurado)
+novo-projeto meu-sistema
+novo-projeto meu-sistema https://url-do-sistema.com
+
+# Via npm
+npm run novo-projeto -- -Nome meu-sistema
+npm run novo-projeto -- -Nome meu-sistema -BaseURL https://url-do-sistema.com
 ```
 
-Gera toda a estrutura em `projetos/nome-do-projeto/` com:
-- `playwright.config.ts` já configurado
-- `PaginaExemplo.ts` com o padrão do core
-- `ExemploTest.spec.ts` com os dois cenários (sucesso/falha)
+Gera toda a estrutura em `projetos/meu-sistema/` com:
+- `playwright.config.ts` já configurado com `baseURL` e `globalSetup`
+- `PaginaExemplo.ts` com o padrão completo do core
+- `ExemploTest.spec.ts` com cenários sucesso e falha
 - `DadosExemplo.json` com estrutura de dados de teste
-- `globalSetup.ts` que registra data/hora no relatório Allure
+- `globalSetup.ts` que registra data, hora e ambiente no Allure
 
 ---
 
@@ -54,7 +60,7 @@ npm run test:ui            # modo interativo Playwright UI
 
 ### Da raiz (workspace)
 ```bash
-npm test --workspace=meu-projeto
+npm test --workspace=bex
 ```
 
 ---
@@ -64,30 +70,23 @@ npm test --workspace=meu-projeto
 ### Fluxo padrão — mantém histórico de tendência (TREND)
 ```bash
 # 1. Rodar os testes
-cd projetos/meu-projeto && npm test
+cd projetos/bex && npm test
 
-# 2. Gerar relatório
+# 2. Gerar relatório (mantém TREND)
 npm run report:allure
 
 # 3. Abrir no browser
 npm run report:allure:open
 ```
 
-Cada vez que `report:allure` é executado **sem reset**, o TREND acumula as runs anteriores.
-
----
-
 ### Zerar tudo — histórico + resultados
 ```bash
 # Na raiz — zera TODOS os projetos
 npm run report:allure:reset
 
-# Ou dentro do projeto específico
-cd projetos/meu-projeto
-npm run report:allure:reset
+# Ou dentro do projeto
+cd projetos/bex && npm run report:allure:reset
 ```
-
-Após o reset, rode os testes novamente para gerar dados frescos.
 
 ---
 
@@ -96,8 +95,8 @@ Após o reset, rode os testes novamente para gerar dados frescos.
 | Comando | O que faz |
 |---|---|
 | `npm run install:all` | Instala dependências de todos os projetos |
-| `npm run novo-projeto -- -Nome <nome>` | Cria novo projeto |
-| `npm run report:allure` | Gera relatório Allure em **todos** os projetos |
+| `novo-projeto <nome>` | Cria novo projeto |
+| `npm run report:allure` | Gera relatório em **todos** os projetos |
 | `npm run report:allure:reset` | Zera histórico e resultados em **todos** os projetos |
 
 ---
@@ -117,27 +116,26 @@ Após o reset, rode os testes novamente para gerar dados frescos.
 
 ## Padrão de página
 
-Todo projeto segue o mesmo padrão herdado do `playwright-core`:
-
 ```typescript
 import { PaginaBase as pb } from 'playwright-core';
 
-// dados carregados uma vez, fora da classe
 const dados = pb.carregarDados<MeusDados>('e2e/dados/meusDados.json');
 
 export default class MinhaPagina extends pb {
 
     async acessar() { ... }
 
+    // sobrescreva apenas se a página preenche campos
     async preencherDados(): Promise<void> {
         const { campo } = dados.obter(this.cenario);
+        await this.caixaTexto.preencherCampo(this.meuCampo, campo);
     }
 
     async executar(cenario: pb.Cenario = 'sucesso') {
-        this.cenario = cenario;           // ← define o cenário no core
+        this.cenario = cenario;
         await this.acessar();
-        await this.preencherDados();      // ← sem parâmetro
-        await this.botao.clicar(...);
+        await this.preencherDados();
+        await this.botao.clicar(this.btnConfirmar);
     }
 }
 ```
@@ -146,5 +144,23 @@ export default class MinhaPagina extends pb {
 
 ## Ambiente no relatório Allure
 
-O `globalSetup.ts` de cada projeto grava automaticamente data, hora e URL no widget **ENVIRONMENT** do Allure a cada execução.
+Cada projeto tem um `globalSetup.ts` mínimo que usa o core:
 
+```typescript
+import { configurarAmbiente } from 'playwright-core';
+
+export default configurarAmbiente({
+    url:      'https://meu-sistema.com',
+    ambiente: process.env.AMBIENTE ?? 'Desenvolvimento',
+});
+```
+
+Controle do ambiente na execução:
+
+```bash
+npm test                            # Ambiente=Desenvolvimento (padrão)
+$env:AMBIENTE="Homologacao"; npm test
+$env:AMBIENTE="Producao";    npm test
+```
+
+Aparece no widget **ENVIRONMENT** do Allure com data, hora, ambiente e URL.

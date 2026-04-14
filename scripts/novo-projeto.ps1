@@ -9,6 +9,13 @@ param(
     [string]$BaseURL = "https://sua-url-aqui.com"
 )
 
+# Escreve arquivo sem BOM (PowerShell 5.1 Set-Content -Encoding UTF8 adiciona BOM)
+function Write-FileNoBom {
+    param([string]$Path, [string]$Content)
+    $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
+    [System.IO.File]::WriteAllText($Path, $Content, $utf8NoBom)
+}
+
 $raiz     = Split-Path $PSScriptRoot -Parent
 $projetos = Join-Path $raiz "projetos"
 $destino  = Join-Path $projetos $Nome
@@ -74,7 +81,7 @@ reports/test-results/
 # Manter a estrutura da pasta reports no repositorio
 !reports/.gitkeep
 "@
-$gitignoreContent | Set-Content (Join-Path $destino ".gitignore") -Encoding UTF8
+Write-FileNoBom (Join-Path $destino ".gitignore") $gitignoreContent
 
 # ── package.json ─────────────────────────────────────────────
 $pkgContent = @"
@@ -108,7 +115,7 @@ $pkgContent = @"
   }
 }
 "@
-$pkgContent | Set-Content (Join-Path $destino "package.json") -Encoding UTF8
+Write-FileNoBom (Join-Path $destino "package.json") $pkgContent
 
 # ── tsconfig.json ────────────────────────────────────────────
 $tsContent = @"
@@ -126,7 +133,7 @@ $tsContent = @"
   "exclude": ["node_modules"]
 }
 "@
-$tsContent | Set-Content (Join-Path $destino "tsconfig.json") -Encoding UTF8
+Write-FileNoBom (Join-Path $destino "tsconfig.json") $tsContent
 
 # ── playwright.config.ts ─────────────────────────────────────
 $configContent = @"
@@ -163,7 +170,7 @@ export default defineConfig({
   ],
 });
 "@
-$configContent | Set-Content (Join-Path $destino "playwright.config.ts") -Encoding UTF8
+Write-FileNoBom (Join-Path $destino "playwright.config.ts") $configContent
 
 # ── globalSetup.ts ───────────────────────────────────────────
 $globalSetupContent = @"
@@ -174,7 +181,7 @@ export default configurarAmbiente({
     ambiente: process.env.AMBIENTE ?? 'Desenvolvimento',
 });
 "@
-$globalSetupContent | Set-Content (Join-Path $destino "e2e\config\globalSetup.ts") -Encoding UTF8
+Write-FileNoBom (Join-Path $destino "e2e\config\globalSetup.ts") $globalSetupContent
 
 # ── BaseTeste.ts ──────────────────────────────────────────────
 $baseTesteContent = @"
@@ -192,7 +199,7 @@ export const test = base.extend<TestFixtures>({
 
 export { expect } from '@playwright/test';
 "@
-$baseTesteContent | Set-Content (Join-Path $destino "e2e\config\BaseTeste.ts") -Encoding UTF8
+Write-FileNoBom (Join-Path $destino "e2e\config\BaseTeste.ts") $baseTesteContent
 
 # ── DadosExemplo.json ────────────────────────────────────────
 $dadosExemploContent = @"
@@ -208,14 +215,14 @@ $dadosExemploContent = @"
   }
 }
 "@
-$dadosExemploContent | Set-Content (Join-Path $destino "e2e\dados\DadosExemplo.json") -Encoding UTF8
+Write-FileNoBom (Join-Path $destino "e2e\dados\DadosExemplo.json") $dadosExemploContent
 
 # ── PaginaExemplo.ts ──────────────────────────────────────────
 $paginaExemploContent = @"
 import { Locator, Page } from '@playwright/test';
 import { PaginaBase as pb } from 'playwright-core';
 
-// ── 1. Interface dos dados ────────────────────────────────────────────────────
+// 1. Interface dos dados
 // Defina os campos que serao lidos do arquivo JSON/YAML.
 // Se a pagina nao usa dados, remova a interface, o carregarDados e o preencherDados.
 interface DadosExemplo {
@@ -223,12 +230,12 @@ interface DadosExemplo {
     senha:   string;
 }
 
-// ── 2. Carregamento dos dados (executado uma vez, fora da classe) ─────────────
+// 2. Carregamento dos dados (executado uma vez, fora da classe)
 const dados = pb.carregarDados<DadosExemplo>('e2e/dados/DadosExemplo.json');
 
 export default class PaginaExemplo extends pb {
 
-    // ── 3. Locators ──────────────────────────────────────────────────────────
+    // 3. Locators
     private readonly campoUsuario: Locator;
     private readonly campoSenha:   Locator;
     private readonly botaoEntrar:  Locator;
@@ -244,13 +251,13 @@ export default class PaginaExemplo extends pb {
         this.msgErro      = pagina.getByText('Credenciais invalidas');
     }
 
-    // ── 4. Navegar ate a pagina ───────────────────────────────────────────────
+    // 4. Navegar ate a pagina
     async acessar() {
         await this.page.goto('/');
         await this.assertiva.urlContem('/login');
     }
 
-    // ── 5. Preencher dados ────────────────────────────────────────────────────
+    // 5. Preencher dados
     // Sobrescreva somente se a pagina preenche campos.
     // Remova este metodo inteiro se a pagina so clica/valida.
     async preencherDados(): Promise<void> {
@@ -260,7 +267,7 @@ export default class PaginaExemplo extends pb {
         await this.caixaTexto.preencherCampo(this.campoSenha,   senha);
     }
 
-    // ── 6. Orquestrar o fluxo completo ────────────────────────────────────────
+    // 6. Orquestrar o fluxo completo
     async executar(cenario: pb.Cenario = 'sucesso') {
         this.cenario = cenario;
         pb.evidencia.parameter('cenario', cenario);
@@ -284,7 +291,7 @@ export default class PaginaExemplo extends pb {
     }
 }
 "@
-$paginaExemploContent | Set-Content (Join-Path $destino "e2e\paginas\PaginaExemplo.ts") -Encoding UTF8
+Write-FileNoBom (Join-Path $destino "e2e\paginas\PaginaExemplo.ts") $paginaExemploContent
 
 # ── ExemploTest.spec.ts ───────────────────────────────────────
 $specContent = @"
@@ -305,7 +312,7 @@ test.describe('$pascal - Exemplo', () => {
 
 });
 "@
-$specContent | Set-Content (Join-Path $destino "e2e\testes\ExemploTest.spec.ts") -Encoding UTF8
+Write-FileNoBom (Join-Path $destino "e2e\testes\ExemploTest.spec.ts") $specContent
 
 
 # ── npm install ───────────────────────────────────────────────

@@ -22,13 +22,11 @@ npm run install:all
 Ou diretamente no projeto:
 
 ```bash
-cd parabank
+cd meu-sistema
 npm install
 ```
 
 ## Scripts disponiveis
-
-No `parabank/package.json`:
 
 - `npm test`: executa os testes
 - `npm run test:headed`: executa com navegador visivel
@@ -41,14 +39,14 @@ No `parabank/package.json`:
 ## Executando os testes
 
 ```bash
-cd parabank
+cd meu-sistema
 npm test
 ```
 
 Rodar um teste especifico:
 
 ```bash
-npx playwright test e2e/Parabank/testes/login/LicenciarTest.spec.ts
+npx playwright test e2e/meu-sistema/testes/login/LicenciarTest.spec.ts
 ```
 
 Rodar com navegador aberto:
@@ -98,7 +96,7 @@ O projeto usa importacoes como:
 import { PaginaBase } from 'playwright-core';
 ```
 
-O mapeamento esta em `parabank/tsconfig.json`:
+O mapeamento esta em `meu-sistema/tsconfig.json`:
 
 - `playwright-core` -> `../playwright-core/index.ts`
 
@@ -106,7 +104,7 @@ O mapeamento esta em `parabank/tsconfig.json`:
 
 ```text
 parabank/
-  e2e/Parabank/
+  e2e/meu-sistema/
     baseTeste/
     paginas/
     testes/
@@ -120,7 +118,7 @@ parabank/
 Da pasta raiz do workspace:
 
 ```bash
-npm run test:parabank
+npm run test:meu-sistema
 npm run test:core
 ```
 
