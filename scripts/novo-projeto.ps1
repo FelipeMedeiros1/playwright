@@ -51,6 +51,7 @@ foreach ($p in @(
     "e2e\testes",
     "e2e\utils",
     "e2e\dados",
+    "e2e\modelo",
     "reports\allure-results",
     "reports\allure-report",
     "reports\playwright-report",
@@ -65,12 +66,9 @@ $gitignoreContent = @"
 node_modules/
 
 # Dados sensíveis - credenciais
-# Arquivos JSON/YAML em e2e/dados/ podem conter credenciais reais - nao commitar.
-e2e/dados/**/*.json
-e2e/dados/**/*.yaml
-e2e/dados/**/*.yml
-# Excecao: arquivo de exemplo (sem credenciais reais) pode ser commitado.
-!e2e/dados/DadosExemplo.json
+# Arquivos reais sao ignorados. Versione apenas *.example.json como template.
+e2e/dados/
+!e2e/dados/**/*.example.json
 
 # Relatorios gerados automaticamente
 reports/allure-results/
@@ -127,7 +125,12 @@ $tsContent = @"
     "strict": true,
     "esModuleInterop": true,
     "resolveJsonModule": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "baseUrl": ".",
+    "paths": {
+      "modelo":   ["e2e/modelo/index.ts"],
+      "modelo/*": ["e2e/modelo/*/index.ts", "e2e/modelo/*.ts"]
+    }
   },
   "include": ["e2e/**/*.ts", "playwright.config.ts"],
   "exclude": ["node_modules"]
@@ -201,10 +204,9 @@ export { expect } from '@playwright/test';
 "@
 Write-FileNoBom (Join-Path $destino "e2e\config\BaseTeste.ts") $baseTesteContent
 
-# ── DadosExemplo.json ────────────────────────────────────────
+# ── DadosExemplo.example.json ────────────────────────────────
 $dadosExemploContent = @"
 {
-  "_comentario": "Arquivo de exemplo. Copie, renomeie (ex.: DadosLogin.json) e preencha com dados reais. Arquivos reais estao no .gitignore.",
   "sucesso": {
     "usuario": "SEU_USUARIO",
     "senha":   "SUA_SENHA"
@@ -215,27 +217,39 @@ $dadosExemploContent = @"
   }
 }
 "@
-Write-FileNoBom (Join-Path $destino "e2e\dados\DadosExemplo.json") $dadosExemploContent
+Write-FileNoBom (Join-Path $destino "e2e\dados\DadosExemplo.example.json") $dadosExemploContent
+
+# ── modelo/DadosExemplo.ts ────────────────────────────────────
+$modeloDadosExemploContent = @"
+export interface DadosExemplo {
+    usuario: string;
+    senha:   string;
+}
+"@
+Write-FileNoBom (Join-Path $destino "e2e\modelo\DadosExemplo.ts") $modeloDadosExemploContent
+
+# ── modelo/index.ts (barrel) ──────────────────────────────────
+$modeloIndexContent = @"
+// Barrel — re-exporta todos os modelos por dominio de pagina
+// Para usar: import { DadosExemplo } from 'modelo/DadosExemplo'
+export * from './DadosExemplo';
+"@
+Write-FileNoBom (Join-Path $destino "e2e\modelo\index.ts") $modeloIndexContent
 
 # ── PaginaExemplo.ts ──────────────────────────────────────────
 $paginaExemploContent = @"
 import { Locator, Page } from '@playwright/test';
 import { PaginaBase as pb } from 'playwright-core';
-
-// 1. Interface dos dados
-// Defina os campos que serao lidos do arquivo JSON/YAML.
-// Se a pagina nao usa dados, remova a interface, o carregarDados e o preencherDados.
-interface DadosExemplo {
-    usuario: string;
-    senha:   string;
-}
-
-// 2. Carregamento dos dados (executado uma vez, fora da classe)
-const dados = pb.carregarDados<DadosExemplo>('e2e/dados/DadosExemplo.json');
+import { DadosExemplo } from 'modelo/DadosExemplo';
 
 export default class PaginaExemplo extends pb {
 
-    // 3. Locators
+    // 1. Dados: campo ligado ao cenario ativo.
+    // this.dados.campo resolve automaticamente via executar(cenario).
+    // Se a pagina nao usa dados, remova esta linha e o preencherDados.
+    private readonly dados = this.carregarDados<DadosExemplo>('e2e/dados/DadosExemplo.json');
+
+    // 2. Locators
     private readonly campoUsuario: Locator;
     private readonly campoSenha:   Locator;
     private readonly botaoEntrar:  Locator;
@@ -251,23 +265,22 @@ export default class PaginaExemplo extends pb {
         this.msgErro      = pagina.getByText('Credenciais invalidas');
     }
 
-    // 4. Navegar ate a pagina
+    // 3. Navegar ate a pagina
     async acessar() {
         await this.page.goto('/');
         await this.assertiva.urlContem('/login');
     }
 
-    // 5. Preencher dados
+    // 4. Preencher dados
     // Sobrescreva somente se a pagina preenche campos.
     // Remova este metodo inteiro se a pagina so clica/valida.
     async preencherDados(): Promise<void> {
-        const { usuario, senha } = dados.obter(this.cenario);
-        pb.evidencia.parameter('usuario', usuario);
-        await this.caixaTexto.preencherCampo(this.campoUsuario, usuario);
-        await this.caixaTexto.preencherCampo(this.campoSenha,   senha);
+        pb.evidencia.parameter('usuario', this.dados.usuario);
+        await this.caixaTexto.preencherCampo(this.campoUsuario, this.dados.usuario);
+        await this.caixaTexto.preencherCampo(this.campoSenha,   this.dados.senha);
     }
 
-    // 6. Orquestrar o fluxo completo
+    // 5. Orquestrar o fluxo completo
     async executar(cenario: pb.Cenario = 'sucesso') {
         this.cenario = cenario;
         pb.evidencia.parameter('cenario', cenario);

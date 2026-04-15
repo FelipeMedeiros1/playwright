@@ -1,11 +1,10 @@
 import { Locator, Page } from '@playwright/test';
 import { PaginaBase as pb } from 'playwright-core';
-import { Credenciais } from 'modelo';
-
-const dados = pb.carregarDados<Credenciais>('e2e/dados/credenciais/dadosUsuario.json');
+import { Credenciais } from 'modelo/Credenciais';
 
 export default class PaginaDeLogin extends pb {
 
+    private readonly dados    = this.carregarDados<Credenciais>('e2e/dados/credenciais/dadosUsuario.json');
     private readonly userName: Locator;
     private readonly password: Locator;
     private readonly botaoLogin: Locator;
@@ -24,9 +23,8 @@ export default class PaginaDeLogin extends pb {
     }
 
     async preencherDados(): Promise<void> {
-        const { matricula, senha } = dados.obter(this.cenario);
-        await this.caixaTexto.preencherCampo(this.userName, matricula);
-        await this.caixaTexto.preencherCampo(this.password, senha);
+        await this.caixaTexto.preencherCampo(this.userName, this.dados.matricula);
+        await this.caixaTexto.preencherCampo(this.password, this.dados.senha);
     }
 
     async executar(cenario: pb.Cenario = 'sucesso') {

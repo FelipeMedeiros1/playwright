@@ -1,6 +1,6 @@
 import { Locator, Page } from '@playwright/test';
 import { PaginaBase as pb } from 'playwright-core';
-import { Credenciais } from 'modelo';
+import { Credenciais } from 'modelo/Credenciais';
 
 export default class PaginaLicenciarUsuario extends pb {
 

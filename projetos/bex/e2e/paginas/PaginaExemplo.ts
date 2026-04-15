@@ -1,6 +1,6 @@
 import { Locator, Page } from '@playwright/test';
 import { PaginaBase as pb } from 'playwright-core';
-import { DadosExemplo } from 'modelo';
+import { DadosExemplo } from 'modelo/DadosExemplo'; // ← crie e2e/modelo/DadosExemplo.ts
 
 export default class PaginaExemplo extends pb {
 

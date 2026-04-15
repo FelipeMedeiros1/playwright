@@ -9,7 +9,8 @@
     "skipLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "modelo": ["e2e/modelo/index.ts"]
+      "modelo":   ["e2e/modelo/index.ts"],
+      "modelo/*": ["e2e/modelo/*/index.ts", "e2e/modelo/*.ts"]
     }
   },
   "include": ["e2e/**/*.ts", "playwright.config.ts"],

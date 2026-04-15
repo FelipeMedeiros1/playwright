@@ -64,7 +64,7 @@ create-proj <nome-do-projeto> <url-do-sistema>
 ```bat
 create-proj conta-corrente
 
-create-proj investimentos https://invest.bradesco.com.br
+create-proj investimentos https://invest.bank.com.br
 
 create-proj cartao-credito https://cartao.bank.com.br
 ```
@@ -79,16 +79,22 @@ Dado o comando `create-proj meu-sistema`, o resultado é:
 playwright/
 └── meu-sistema/
     ├── e2e/
-    │   └── MeuSistema/
-    │       ├── baseTeste/
-    │       │   └── BaseTeste.ts        ← fixture base pronta para uso
-    │       ├── paginas/                ← suas Page Objects aqui
-    │       ├── testes/
-    │       │   └── ExemploTest.spec.ts ← teste de exemplo funcionando
-    │       └── utils/                  ← utilitários do projeto
-    ├── playwright.config.ts            ← Chromium + Edge configurados
-    ├── tsconfig.json                   ← pronto para uso
-    └── package.json                    ← playwright-core instalado do GitHub
+    │   ├── config/
+    │   │   ├── BaseTeste.ts            ← fixture base pronta para uso
+    │   │   └── globalSetup.ts
+    │   ├── dados/
+    │   │   └── DadosExemplo.example.json  ← template (dados reais no .gitignore)
+    │   ├── modelo/
+    │   │   ├── index.ts               ← barrel (re-exporta todos os modelos)
+    │   │   └── DadosExemplo.ts        ← interface de dados
+    │   ├── paginas/
+    │   │   └── PaginaExemplo.ts       ← Page Object de exemplo
+    │   ├── testes/
+    │   │   └── ExemploTest.spec.ts    ← teste de exemplo funcionando
+    │   └── utils/
+    ├── playwright.config.ts           ← Chromium + Edge configurados
+    ├── tsconfig.json                  ← paths wildcard modelo/* configurado
+    └── package.json                   ← playwright-core instalado do GitHub
 ```
 
 O `package.json` da raiz do workspace também é atualizado automaticamente com:
@@ -121,7 +127,7 @@ npx playwright test --headed
 ### Rodar pela raiz do workspace
 
 ```bat
-cd C:\bradesco\proj-aut\playwright
+cd C:\playwright
 npm run test:meu-sistema
 ```
 
@@ -163,6 +169,72 @@ export default class PaginaHome extends PaginaBase {
   }
 }
 ```
+
+---
+
+## Modelo de dados (e2e/modelo/)
+
+Cada interface que representa um arquivo de dados (`JSON`/`YAML`) fica em um arquivo dentro de `e2e/modelo/`.  
+O `tsconfig.json` já possui wildcard configurado — **nenhuma alteração adicional é necessária**.
+
+### 1. Criar o arquivo de modelo
+
+```
+e2e/modelo/Credenciais.ts
+```
+
+```ts
+export interface Credenciais {
+    usuario: string;
+    senha:   string;
+}
+```
+
+### 2. Importar na Page Object
+
+```ts
+import { Credenciais } from 'modelo/Credenciais';
+
+export default class PaginaDeLogin extends pb {
+
+    private readonly dados = this.carregarDados<Credenciais>('e2e/dados/credenciais/dadosUsuario.json');
+
+    async preencherDados(): Promise<void> {
+        await this.caixaTexto.preencherCampo(this.userName, this.dados.usuario);
+        await this.caixaTexto.preencherCampo(this.password, this.dados.senha);
+    }
+}
+```
+
+### 3. Criar o arquivo de dados
+
+```
+e2e/dados/credenciais/dadosUsuario.json
+```
+
+```json
+{
+  "sucesso": { "usuario": "M000001",  "senha": "senha123" },
+  "falha":   { "usuario": "M000001Err", "senha": "errada" }
+}
+```
+
+> ⚠️ Arquivos de dados reais são ignorados pelo `.gitignore`.  
+> Crie um `dadosUsuario.example.json` sanitizado para versionar como template.
+
+### Estrutura resultante
+
+```
+e2e/
+├── dados/
+│   └── credenciais/
+│       ├── dadosUsuario.json          ← ignorado pelo git (credenciais reais)
+│       └── dadosUsuario.example.json  ← versionado (template sanitizado)
+└── modelo/
+    └── Credenciais.ts                 ← interface de dados
+```
+
+
 
 ### Exemplo de Fixture
 
