@@ -1,20 +1,15 @@
 import { Locator, Page } from '@playwright/test';
 import { PaginaBase as pb } from 'playwright-core';
-
-// ── 1. Interface dos dados ────────────────────────────────────────────────────
-// Defina os campos que serão lidos do arquivo JSON/YAML.
-// Se a página não usa dados, remova a interface, o carregarDados e o preencherDados.
-interface DadosExemplo {
-    usuario: string;
-    senha:   string;
-}
-
-// ── 2. Carregamento dos dados (executado uma vez, fora da classe) ─────────────
-const dados = pb.carregarDados<DadosExemplo>('e2e/dados/DadosExemplo.json');
+import { DadosExemplo } from 'modelo';
 
 export default class PaginaExemplo extends pb {
 
-    // ── 3. Locators ──────────────────────────────────────────────────────────
+    // ── 1. Dados ──────────────────────────────────────────────────────────────
+    // Campo ligado ao cenário ativo: this.dados.campo resolve automaticamente
+    // a partir do cenario definido em executar().
+    private readonly dados = this.carregarDados<DadosExemplo>('e2e/dados/DadosExemplo.json');
+
+    // ── 2. Locators ──────────────────────────────────────────────────────────
     private readonly campoUsuario: Locator;
     private readonly campoSenha:   Locator;
     private readonly botaoEntrar:  Locator;
@@ -30,25 +25,24 @@ export default class PaginaExemplo extends pb {
         this.msgErro      = pagina.getByText('Credenciais inválidas');
     }
 
-    // ── 4. Navegar até a página ───────────────────────────────────────────────
+    // ── 3. Navegar até a página ───────────────────────────────────────────────
     async acessar() {
         await this.page.goto('/');
         await this.assertiva.urlContem('/login');
     }
 
-    // ── 5. Preencher dados ────────────────────────────────────────────────────
+    // ── 4. Preencher dados ────────────────────────────────────────────────────
     // Sobrescreva somente se a página preenche campos.
     // Remova este método inteiro se a página só clica/valida.
     async preencherDados(): Promise<void> {
-        const { usuario, senha } = dados.obter(this.cenario);
-        pb.evidencia.parameter('usuario', usuario);
-        await this.caixaTexto.preencherCampo(this.campoUsuario, usuario);
-        await this.caixaTexto.preencherCampo(this.campoSenha,   senha);
+        pb.evidencia.parameter('usuario', this.dados.usuario);
+        await this.caixaTexto.preencherCampo(this.campoUsuario, this.dados.usuario);
+        await this.caixaTexto.preencherCampo(this.campoSenha,   this.dados.senha);
     }
 
-    // ── 6. Orquestrar o fluxo completo ────────────────────────────────────────
+    // ── 5. Orquestrar o fluxo completo ────────────────────────────────────────
     async executar(cenario: pb.Cenario = 'sucesso') {
-        this.cenario = cenario;
+        this.cenario = cenario;   // ← Proxy lê este valor em cada this.dados.campo
         pb.evidencia.parameter('cenario', cenario);
 
         await pb.evidencia.step('Acessar página', async () => {
@@ -69,4 +63,3 @@ export default class PaginaExemplo extends pb {
         });
     }
 }
-

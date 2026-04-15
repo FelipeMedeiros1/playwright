@@ -32,6 +32,28 @@ export abstract class PaginaBase {
         return new DadosCenario<T>(LeitorDeArquivo.lerDados<DadosTeste_<T>>(caminho));
     }
 
+    /**
+     * Versão de instância — retorna um Proxy<T> que resolve as propriedades
+     * automaticamente a partir do cenário ativo (`this.cenario`).
+     * Deve ser usado como campo da classe para que `this` esteja disponível.
+     *
+     * @example
+     * private readonly dados = this.carregarDados<Credenciais>('e2e/dados/credenciais/dadosUsuario.json');
+     * // dentro de qualquer método:
+     * this.dados.matricula   // usa o cenario definido em executar()
+     */
+    protected carregarDados<T extends object>(caminho: string): T {
+        const mapa = LeitorDeArquivo.lerDados<DadosTeste_<T>>(caminho);
+        return new Proxy({} as T, {
+            get: (_target, prop: string | symbol) => {
+                if (typeof prop !== 'string') return undefined;
+                const item = mapa[this.cenario];
+                if (!item) throw new Error(`Cenário "${this.cenario}" não encontrado nos dados de teste.`);
+                return item[prop as keyof T];
+            }
+        });
+    }
+
     protected readonly page: Page;
     protected readonly botao: Botao;
     protected readonly caixaTexto: CaixaTexto;

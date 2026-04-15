@@ -1,7 +1,6 @@
 import { Locator, Page } from '@playwright/test';
 import { PaginaBase as pb } from 'playwright-core';
-
-interface Credenciais { matricula: string; senha: string; }
+import { Credenciais } from 'modelo';
 
 const dados = pb.carregarDados<Credenciais>('e2e/dados/credenciais/dadosUsuario.json');
 

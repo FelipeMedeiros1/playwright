@@ -1,17 +1,10 @@
 import { Locator, Page } from '@playwright/test';
 import { PaginaBase as pb } from 'playwright-core';
-
-interface Credenciais {
-    matricula: string;
-    senha: string;
-}
-
-const dados =
-    pb.carregarDados<Credenciais>('e2e/dados/credenciais/dadosUsuario.json');
-
+import { Credenciais } from 'modelo';
 
 export default class PaginaLicenciarUsuario extends pb {
 
+    private readonly dados    = this.carregarDados<Credenciais>('e2e/dados/credenciais/dadosUsuario.json');
     private readonly matricula: Locator;
     private readonly senha: Locator;
     private readonly linkLicenciarUsuario: Locator;
@@ -31,16 +24,16 @@ export default class PaginaLicenciarUsuario extends pb {
         this.msgFalha   = pagina.getByText('Falha.');
     }
 
+
     async acessar() {
         await this.botao.clicar(this.linkLicenciarUsuario);
         await this.assertiva.urlContem('/licenciar-usuario');
     }
 
     async preencherDados(): Promise<void> {
-        const { matricula, senha } = dados.obter(this.cenario);
-        pb.evidencia.parameter('matricula', matricula);
-        await this.caixaTexto.preencherCampo(this.matricula, matricula);
-        await this.caixaTexto.preencherCampo(this.senha, senha);
+        pb.evidencia.parameter('matricula', this.dados.matricula);
+        await this.caixaTexto.preencherCampo(this.matricula, this.dados.matricula);
+        await this.caixaTexto.preencherCampo(this.senha,     this.dados.senha);
     }
 
     async executar(cenario: pb.Cenario = 'sucesso') {
