@@ -1,0 +1,15 @@
+node_modules/
+
+# Dados sensÃ­veis - credenciais
+# Arquivos reais sao ignorados. Versione apenas *.example.json como template.
+e2e/dados/
+!e2e/dados/**/*.example.json
+
+# Relatorios gerados automaticamente
+reports/allure-results/
+reports/allure-report/
+reports/playwright-report/
+reports/test-results/
+
+# Manter a estrutura da pasta reports no repositorio
+!reports/.gitkeep

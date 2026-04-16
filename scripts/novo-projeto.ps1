@@ -52,6 +52,7 @@ foreach ($p in @(
     "e2e\utils",
     "e2e\dados",
     "e2e\modelo",
+    ".githooks",
     "reports\allure-results",
     "reports\allure-report",
     "reports\playwright-report",
@@ -90,6 +91,7 @@ $pkgContent = @"
   "main": "index.js",
   "type": "commonjs",
   "scripts": {
+    "prepare":            "git config core.hooksPath .githooks",
     "test":               "npx rimraf reports/allure-results reports/playwright-report reports/test-results && playwright test",
     "test:headed":        "npx rimraf reports/allure-results reports/playwright-report reports/test-results && playwright test --headed",
     "test:ui":            "playwright test --ui",
@@ -327,6 +329,52 @@ test.describe('$pascal - Exemplo', () => {
 "@
 Write-FileNoBom (Join-Path $destino "e2e\testes\ExemploTest.spec.ts") $specContent
 
+
+# ── .githooks/pre-commit ─────────────────────────────────────
+$preCommitContent = @"
+#!/bin/sh
+# ──────────────────────────────────────────────────────────────────────────────
+#  Pre-commit hook — Protecao de dados sensiveis
+#
+#  Bloqueia o commit se qualquer arquivo JSON ou YAML staged contiver
+#  as palavras abaixo como CHAVE (ex.: "senha": "valor").
+#
+#  Palavras monitoradas: senha . username . pwd . password . matricula
+#
+#  Para ignorar pontualmente (nao recomendado):
+#    git commit --no-verify
+# ──────────────────────────────────────────────────────────────────────────────
+
+KEYWORDS='"(senha|username|pwd|password|matricula)\s*:'
+ENCONTROU=0
+
+for ARQUIVO in `$(git diff --cached --name-only --diff-filter=ACM); do
+    case "`$ARQUIVO" in
+        *.json|*.yaml|*.yml)
+            if git show ":`$ARQUIVO" | grep -qiP "`$KEYWORDS"; then
+                echo ""
+                echo "  BLOQUEADO: dado sensivel detectado"
+                echo "  Arquivo : `$ARQUIVO"
+                echo "  Palavras: senha, username, pwd, password, matricula"
+                echo ""
+                echo "  Opcoes:"
+                echo "    1) Adicione o arquivo ao .gitignore"
+                echo "    2) Use um .example.json com valores ficticios"
+                echo "    3) Mova os valores para variaveis de ambiente"
+                echo ""
+                ENCONTROU=1
+            fi
+            ;;
+    esac
+done
+
+if [ "`$ENCONTROU" -eq 1 ]; then
+    exit 1
+fi
+
+exit 0
+"@
+Write-FileNoBom (Join-Path $destino ".githooks\pre-commit") $preCommitContent
 
 # ── npm install ───────────────────────────────────────────────
 Write-Host " Instalando dependencias..." -ForegroundColor Cyan

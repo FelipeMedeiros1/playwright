@@ -13,7 +13,7 @@ A suite cobre fluxos de negocio do Parabank (ex.: login, cadastro e atualizacao 
 
 ## Instalacao
 
-Pela raiz do workspace (`C:\bradesco\proj-aut\playwright`):
+Pela raiz do workspace (`C:\playwright`):
 
 ```bash
 npm run install:all
@@ -26,6 +26,22 @@ cd meu-sistema
 npm install
 ```
 
+## Criar novo projeto
+
+Direto no terminal (recomendado):
+
+```bash
+create-proj meu-sistema
+create-proj meu-sistema https://url-do-sistema.com
+```
+
+Ou via npm, da raiz do workspace:
+
+```bash
+npm run novo-projeto -- -Nome meu-sistema
+npm run novo-projeto -- -Nome meu-sistema -BaseURL https://url-do-sistema.com
+```
+
 ## Scripts disponiveis
 
 - `npm test`: executa os testes
@@ -34,6 +50,7 @@ npm install
 - `npm run report:html`: abre o relatorio HTML do Playwright
 - `npm run report:allure`: gera relatorio Allure em `allure-report`
 - `npm run report:allure:open`: sobe servidor local do Allure
+- `npm run report:allure:reset`: apaga `allure-results` e `allure-report` (começa do zero)
 - `npm run prepare`: instala navegadores do Playwright
 
 ## Executando os testes
@@ -86,6 +103,12 @@ Relatorio Allure:
 ```bash
 npm run report:allure
 npm run report:allure:open
+```
+
+Zerar historico e resultados Allure:
+
+```bash
+npm run report:allure:reset
 ```
 
 ## Integracao com playwright-core

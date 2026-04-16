@@ -11,10 +11,15 @@ playwright/
 ├── playwright-core/     ← biblioteca base compartilhada (PaginaBase, componentes, utils)
 ├── projetos/
 │   ├── parabank/        ← projeto E2E parabank
-│   └── .../             ← novos projetos criados com novo-projeto
+│   └── meu-sistema/     ← projeto criado com create-proj
+│       └── e2e/
+│           ├── modelo/  ← interfaces TypeScript que tipam os dados de teste (ex.: Credenciais.ts)
+│           ├── dados/   ← arquivos JSON com os valores de cada cenário
+│           ├── paginas/ ← Page Objects
+│           └── testes/  ← specs Playwright
 └── scripts/
     ├── novo-projeto.ps1 ← gerador de projetos
-    └── novo-projeto.cmd ← atalho para rodar direto no terminal
+    └── create-proj.cmd  ← atalho para rodar direto no terminal
 ```
 
 ---
@@ -31,8 +36,8 @@ npm run install:all
 
 ```bash
 # Direto no terminal (PATH configurado)
-novo-projeto meu-sistema
-novo-projeto meu-sistema https://url-do-sistema.com
+create-proj meu-sistema
+create-proj meu-sistema https://url-do-sistema.com
 
 # Via npm
 npm run novo-projeto -- -Nome meu-sistema
@@ -52,7 +57,7 @@ Gera toda a estrutura em `projetos/meu-sistema/` com:
 
 ### De dentro do projeto
 ```bash
-cd projetos/bex
+cd projetos/meu-sistema
 npm test                   # limpa resultados anteriores + roda
 npm run test:headed        # com navegador visível
 npm run test:ui            # modo interativo Playwright UI
@@ -60,7 +65,7 @@ npm run test:ui            # modo interativo Playwright UI
 
 ### Da raiz (workspace)
 ```bash
-npm test --workspace=bex
+npm test --workspace=meu-sistema
 ```
 
 ---
@@ -70,7 +75,7 @@ npm test --workspace=bex
 ### Fluxo padrão — mantém histórico de tendência (TREND)
 ```bash
 # 1. Rodar os testes
-cd projetos/bex && npm test
+cd projetos/meu-sistema && npm test
 
 # 2. Gerar relatório (mantém TREND)
 npm run report:allure
@@ -85,7 +90,7 @@ npm run report:allure:open
 npm run report:allure:reset
 
 # Ou dentro do projeto
-cd projetos/bex && npm run report:allure:reset
+cd projetos/meu-sistema && npm run report:allure:reset
 ```
 
 ---
@@ -95,7 +100,8 @@ cd projetos/bex && npm run report:allure:reset
 | Comando | O que faz |
 |---|---|
 | `npm run install:all` | Instala dependências de todos os projetos |
-| `novo-projeto <nome>` | Cria novo projeto |
+| `create-proj <nome>` | Cria novo projeto (CLI) |
+| `npm run novo-projeto -- -Nome <nome>` | Cria novo projeto (via npm) |
 | `npm run report:allure` | Gera relatório em **todos** os projetos |
 | `npm run report:allure:reset` | Zera histórico e resultados em **todos** os projetos |
 
