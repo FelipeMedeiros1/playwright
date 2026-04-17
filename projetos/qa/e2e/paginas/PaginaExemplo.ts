@@ -1,27 +1,17 @@
-import { Locator, Page } from '@playwright/test';
 import { PaginaBase as pb } from 'playwright-core';
 
 
 export default class PaginaExemplo extends pb {
 
-    private readonly botaoAjuda:  Locator;
-    private readonly modBibliotecas: Locator;
-    private readonly subCalendario: Locator;
-    private readonly itemLista: Locator;
-    private readonly msgSucesso:   Locator;
-
-    constructor(pagina: Page) {
-        super(pagina);
-        this.botaoAjuda  = pagina.getByRole('button', { name: 'Ajuda' });
-        this.modBibliotecas  = pagina.getByRole('listitem').filter({ hasText: 'Bibliotecas' }).nth(1);
-        this.subCalendario   = pagina.getByRole('button', { name: 'Expandir conteúdo da pasta' }).nth(5);
-        this.itemLista   = pagina.getByRole('listitem').filter({ hasText: 'DIA_SEXTA_FEIRA' });
-        this.msgSucesso   = pagina.getByText('Descrição: constante que');
-    }
+    private readonly botaoAjuda     = this.pagina.getByRole('button', { name: 'Ajuda' });
+    private readonly modBibliotecas = this.pagina.getByRole('listitem').filter({ hasText: 'Bibliotecas' }).nth(1);
+    private readonly subCalendario  = this.pagina.getByRole('button', { name: 'Expandir conteúdo da pasta' }).nth(5);
+    private readonly itemLista      = this.pagina.getByRole('listitem').filter({ hasText: 'DIA_SEXTA_FEIRA' });
+    private readonly msgSucesso     = this.pagina.getByText('Descrição: constante que');
 
     async acessar() {
-        await this.page.goto('/');
-       await this.assertiva.urlContem('dev/');
+        await this.pagina.goto('/');
+        await this.assertiva.urlContem('dev/');
     }
 
     async executar(cenario: pb.Cenario = 'sucesso') {

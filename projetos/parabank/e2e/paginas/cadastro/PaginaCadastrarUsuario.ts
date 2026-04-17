@@ -74,7 +74,7 @@ export default class PaginaCadastrarUsuario extends PaginaBase {
             await this.caixaTexto.preencherCampo(this.repeatedPassword, senha);
 
             a.parameter("Usuário", usuario);
-            a.attachScreenshot(this.page, "formulario-preenchido");
+            a.attachScreenshot(this.pagina, "formulario-preenchido");
 
             return { usuario, senha };
         });
@@ -102,7 +102,7 @@ export default class PaginaCadastrarUsuario extends PaginaBase {
                 this.messageSuccess,
                 'Your account was created successfully. You are now logged in.'
             );
-            await a.attachScreenshot(this.page, 'cadastro-sucesso');
+            await a.attachScreenshot(this.pagina, 'cadastro-sucesso');
         });
 
         await a.step('Efetuar logout', async () => {

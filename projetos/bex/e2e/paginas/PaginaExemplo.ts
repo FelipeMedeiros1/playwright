@@ -27,7 +27,7 @@ export default class PaginaExemplo extends pb {
 
     // ── 3. Navegar até a página ───────────────────────────────────────────────
     async acessar() {
-        await this.page.goto('/');
+        await this.pagina.goto('/');
         await this.assertiva.urlContem('/login');
     }
 

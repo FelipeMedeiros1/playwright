@@ -240,7 +240,6 @@ Write-FileNoBom (Join-Path $destino "e2e\modelo\index.ts") $modeloIndexContent
 
 # ── PaginaExemplo.ts ──────────────────────────────────────────
 $paginaExemploContent = @"
-import { Locator, Page } from '@playwright/test';
 import { PaginaBase as pb } from 'playwright-core';
 import { DadosExemplo } from 'modelo/DadosExemplo';
 
@@ -251,25 +250,16 @@ export default class PaginaExemplo extends pb {
     // Se a pagina nao usa dados, remova esta linha e o preencherDados.
     private readonly dados = this.carregarDados<DadosExemplo>('e2e/dados/DadosExemplo.json');
 
-    // 2. Locators
-    private readonly campoUsuario: Locator;
-    private readonly campoSenha:   Locator;
-    private readonly botaoEntrar:  Locator;
-    private readonly msgSucesso:   Locator;
-    private readonly msgErro:      Locator;
-
-    constructor(pagina: Page) {
-        super(pagina);
-        this.campoUsuario = pagina.locator('#usuario');
-        this.campoSenha   = pagina.locator('#senha');
-        this.botaoEntrar  = pagina.getByRole('button', { name: 'Entrar' });
-        this.msgSucesso   = pagina.getByText('Bem-vindo!');
-        this.msgErro      = pagina.getByText('Credenciais invalidas');
-    }
+    // 2. Locators — declaracao + inicializacao na mesma linha (sem constructor)
+    private readonly campoUsuario = this.pagina.locator('#usuario');
+    private readonly campoSenha   = this.pagina.locator('#senha');
+    private readonly botaoEntrar  = this.pagina.getByRole('button', { name: 'Entrar' });
+    private readonly msgSucesso   = this.pagina.getByText('Bem-vindo!');
+    private readonly msgErro      = this.pagina.getByText('Credenciais invalidas');
 
     // 3. Navegar ate a pagina
     async acessar() {
-        await this.page.goto('/');
+        await this.pagina.goto('/');
         await this.assertiva.urlContem('/login');
     }
 

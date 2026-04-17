@@ -54,7 +54,7 @@ export abstract class PaginaBase {
         });
     }
 
-    protected readonly page: Page;
+    protected readonly pagina: Page;
     protected readonly botao: Botao;
     protected readonly caixaTexto: CaixaTexto;
     protected readonly checkbox: CheckkBox;
@@ -69,7 +69,7 @@ export abstract class PaginaBase {
 
 
     constructor(page: Page) {
-        this.page = page;
+        this.pagina = page;
         this.botao = new Botao(page);
         this.caixaTexto = new CaixaTexto(page);
         this.checkbox = new CheckkBox(page);
@@ -82,7 +82,7 @@ export abstract class PaginaBase {
     }
 
     async acessarUrl(url: string) {
-        await this.page.goto(url);
+        await this.pagina.goto(url);
     }
 
     abstract acessar(): Promise<void>;
