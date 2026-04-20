@@ -1,29 +1,16 @@
-import { Locator, Page } from '@playwright/test';
 import { PaginaBase as pb } from 'playwright-core';
 import { Credenciais } from 'modelo/Credenciais';
 
 export default class PaginaLicenciarUsuario extends pb {
 
-    private readonly dados    = this.carregarDados<Credenciais>('e2e/dados/credenciais/dadosUsuario.json');
-    private readonly matricula: Locator;
-    private readonly senha: Locator;
-    private readonly linkLicenciarUsuario: Locator;
-    private readonly cbxFerramentas: Locator;
-    private readonly botaoEnviar: Locator;
-    private readonly msgSucesso: Locator;
-    private readonly msgFalha: Locator;
-
-    constructor(pagina: Page) {
-        super(pagina);
-        this.linkLicenciarUsuario = pagina.locator('nav').getByRole('link', { name: 'Licenciar Usuário DevOps' });
-        this.matricula = pagina.locator('#matricula');
-        this.senha = pagina.locator('#senha');
-        this.cbxFerramentas = pagina.locator('#ferramentas');
-        this.botaoEnviar = pagina.getByRole('button', { name: 'Enviar' });
-        this.msgSucesso = pagina.getByText('Sucesso!');
-        this.msgFalha   = pagina.getByText('Falha.');
-    }
-
+    private readonly dados            = this.carregarDados<Credenciais>('e2e/dados/credenciais/dadosUsuario.json');
+    private readonly matricula        = this.pagina.locator('#matricula');
+    private readonly senha            = this.pagina.locator('#senha');
+    private readonly linkLicenciarUsuario = this.pagina.locator('nav').getByRole('link', { name: 'Licenciar Usuário DevOps' });
+    private readonly cbxFerramentas   = this.pagina.locator('#ferramentas');
+    private readonly botaoEnviar      = this.pagina.getByRole('button', { name: 'Enviar' });
+    private readonly msgSucesso       = this.pagina.getByText('Sucesso!');
+    private readonly msgFalha         = this.pagina.getByText('Falha.');
 
     async acessar() {
         await this.botao.clicar(this.linkLicenciarUsuario);
@@ -59,5 +46,4 @@ export default class PaginaLicenciarUsuario extends pb {
         });
     }
 }
-
 
