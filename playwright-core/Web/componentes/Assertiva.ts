@@ -70,8 +70,12 @@ export class Assertiva {
     /**
      * Verifica se a URL atual contém determinado trecho
      */
-    async urlContem(texto: string) {
+    async urlContemTexto(texto: string) {
         await expect(this.page).toHaveURL(new RegExp(texto));
+    }
+
+    async urlContem(texto: string, pagina?: Page) {
+        await expect(pagina ?? this.page).toHaveURL(new RegExp(texto));
     }
 
     /**

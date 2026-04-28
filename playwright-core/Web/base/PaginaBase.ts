@@ -7,6 +7,7 @@ import { Espera } from '../componentes/Espera';
 import { Assertiva } from '../componentes/Assertiva';
 import { Calendario } from '../componentes/Calendario';
 import { Tabela } from '../componentes/Tabela';
+import { Link } from '../componentes/Link';
 import { AllureHelper } from '../utils/AllureHelper';
 import { LeitorDeArquivo } from '../utils/LeitorDeArquivo';
 import { Cenario, DadosCenario } from '../utils/TiposTeste';
@@ -61,9 +62,9 @@ export abstract class PaginaBase {
     protected readonly comboBox: ComboBox;
     protected readonly espera: Espera;
     protected readonly assertiva: Assertiva;
+    protected readonly link: Link;
     protected readonly tabela: Tabela;
     protected readonly calendario: Calendario;
-
     /** Cenário ativo — definido por `executar(cenario)` e lido por `preencherDados()` */
     protected cenario: Cenario = 'sucesso';
 
@@ -79,6 +80,7 @@ export abstract class PaginaBase {
         this.calendario = new Calendario(page);
         this.tabela = new Tabela(page);
         this.assertiva = new Assertiva(page);
+        this.link = new Link(page);
     }
 
     async acessarUrl(url: string) {

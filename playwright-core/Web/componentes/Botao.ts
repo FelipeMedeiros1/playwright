@@ -51,6 +51,18 @@ export class Botao {
     throw new Error(`Não foi possível realizar o duplo clique no elemento após 10 tentativas`);
   }
 
+async clicarPorTexto(texto: string) {
+    const containers = ['header', 'footer', 'aside', 'main', 'nav'];
+    for (const seletor of containers) {
+      const locator = this.page.locator(seletor).getByRole('button', { name: texto, exact: true }).filter({ visible: true });
+      if (await locator.count() === 1) {
+        await this.clicar(locator);
+        return;
+      }
+    }
+    await this.clicar(this.page.getByRole('button', { name: texto, exact: true }));
+  }
+
 
   async clickEmMenuComSubmodulo(menu: Locator, modulo: Locator, pagina: Locator) {
     await menu.hover();
